@@ -301,6 +301,20 @@ trait PeripheryCoreplexLocalInterrupter extends LazyModule with HasPeripheryPara
   val clint = LazyModule(new CoreplexLocalInterrupter(clintConfig)(outerMMIOParams))
   // The periphery bus is 32-bit, so we may need to adapt its width to XLen
   clint.node := TLFragmenter(beatBytes, cacheBlockBytes)(TLWidthWidget(peripheryBusConfig.beatBytes)(peripheryBus.node))
+
+  class WTF extends LazyModule {
+    val node = TLInputNode()
+    val tlram = LazyModule(new TLRAM(AddressSet(0x54321000, 0xfff)))
+    tlram.node := node
+
+    lazy val module = new LazyModuleImp(this) {
+      val io = new Bundle {
+        val in = node.bundleIn
+      }
+    }
+  }
+
+  LazyModule(new WTF).node := TLFragmenter(peripheryBusConfig.beatBytes, cacheBlockBytes)(peripheryBus.node)
 }
 
 trait PeripheryCoreplexLocalInterrupterBundle {
