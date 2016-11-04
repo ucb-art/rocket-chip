@@ -96,6 +96,10 @@ abstract class GroundTest(implicit val p: Parameters) extends Module
   val io = new GroundTestIO
 }
 
+class GroundTestTileIO(c: TileBundleConfig)(implicit p: Parameters) extends Bundle {
+
+}
+
 class GroundTestTile(implicit val p: Parameters) extends LazyTile {
   val slave = None
   lazy val module = new TileImp(this) with HasGroundTestParameters {
