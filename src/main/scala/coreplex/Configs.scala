@@ -106,7 +106,7 @@ class BaseCoreplexConfig extends Config (
       case LNEndpoints => site(TLKey(site(TLId))).nManagers + site(TLKey(site(TLId))).nClients
       case LNHeaderBits => log2Ceil(site(TLKey(site(TLId))).nManagers) +
                              log2Up(site(TLKey(site(TLId))).nClients)
-      case TLKey("L1toL2") => {
+      case TLKey("DefaultL1toL2") => {
         val useMEI = site(NTiles) <= 1 && site(NCachedTileLinkPorts) <= 1
         TileLinkParameters(
           coherencePolicy = (
@@ -123,9 +123,9 @@ class BaseCoreplexConfig extends Config (
           maxClientsPerPort = if (site(BuildRoCC).isEmpty) 1 else 2,
           maxManagerXacts = site(NAcquireTransactors) + 2,
           dataBeats = innerDataBeats,
-          dataBits = site(CacheBlockBytes)*8)
-      }
-      case TLKey("L2toMC") => 
+          dataBits = site(CacheBlockBytes)*8) }
+      case TLKey("L1toL2") => site(TLKey("DefaultL1toL2")).copy()
+      case TLKey("DefaultL2toMC") =>
         TileLinkParameters(
           coherencePolicy = new MEICoherence(
             new NullRepresentation(site(NBanksPerMemoryChannel))),
@@ -137,7 +137,8 @@ class BaseCoreplexConfig extends Config (
           maxManagerXacts = 1,
           dataBeats = innerDataBeats,
           dataBits = site(CacheBlockBytes)*8)
-      case TLKey("L2toMMIO") => {
+      case TLKey("L2toMC") => site(TLKey("DefaultL2toMC")).copy()
+      case TLKey("DefaultL2toMMIO") => {
         TileLinkParameters(
           coherencePolicy = new MICoherence(
             new NullRepresentation(site(NBanksPerMemoryChannel))),
@@ -150,6 +151,7 @@ class BaseCoreplexConfig extends Config (
           dataBeats = innerDataBeats,
           dataBits = site(CacheBlockBytes) * 8)
       }
+      case TLKey("L2toMMIO") => site(TLKey("DefaultL2toMMIO")).copy()
 
       case BootROMFile => "./bootrom/bootrom.img"
       case NTiles => 1

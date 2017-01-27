@@ -50,6 +50,7 @@ class RegressionTestSuite(val names: LinkedHashSet[String]) extends RocketTestSu
 object TestGeneration {
   import scala.collection.mutable.HashMap
   val asmSuites = new LinkedHashMap[String,AssemblyTestSuite]()
+  val postscript = new HashMap[String,String]()
   val bmarkSuites = new LinkedHashMap[String,BenchmarkTestSuite]()
   val regressionSuites = new LinkedHashMap[String,RegressionTestSuite]()
 
@@ -61,6 +62,8 @@ object TestGeneration {
     }
   }
   
+  def addVariable(name: String, value: String) { postscript += (name -> value) }
+
   def addSuites(s: Seq[RocketTestSuite]) { s.foreach(addSuite) }
 
   def generateMakefrag: String = {
@@ -94,7 +97,8 @@ run-$kind-tests-fast: $$(addprefix $$(output_dir)/, $$(addsuffix .run, $targets)
       gen("asm", asmSuites.values.toSeq),
       gen("bmark", bmarkSuites.values.toSeq),
       gen("regression", regressionSuites.values.toSeq)
-    ).mkString("\n")
+    ).mkString("\n") +
+    postscript.map(p => p._1 + " = " + p._2).mkString("\n")
   }
 
 }
