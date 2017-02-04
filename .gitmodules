@@ -18,4 +18,4 @@
 	url = https://github.com/ucb-bar/firrtl.git
 [submodule "hwacha"]
 	path = hwacha
-	url = https://github.com/ucb-bar/hwacha.git
+	url = git@github.com:ucb-bar/hwacha.git
