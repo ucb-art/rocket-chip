@@ -86,7 +86,10 @@ object LazyModule
   }
 }
 
-abstract class LazyModuleImp(outer: LazyModule) extends Module
+abstract class LazyModuleImp(
+  outer: LazyModule,
+  override_clock: Option[Clock]=None,
+  override_reset: Option[Bool]=None) extends Module(override_clock, override_reset)
 {
   // .module had better not be accessed while LazyModules are still being built!
   require (LazyModule.stack.isEmpty, s"${outer.name}.module was constructed before LazyModule() was run on ${LazyModule.stack.head.name}")
