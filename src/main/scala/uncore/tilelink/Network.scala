@@ -59,6 +59,51 @@ class BasicCrossbar[T <: Data](conf: CrossbarConfig[T]) extends AbstractCrossbar
   }}
 }
 
+class HybridCrossbar[T <: Data](maxRadix: Int, conf: CrossbarConfig[T])
+    extends AbstractCrossbar(conf) {
+  if (conf.n < maxRadix) {
+    val basic = Module(new BasicCrossbar(conf))
+    io <> basic.io
+  } else {
+    require(isPow2(maxRadix))
+
+    val mid_in  = Wire(Vec(maxRadix, io.in(0)))
+    val mid_out = Wire(Vec(maxRadix, io.in(0)))
+
+    for (i <- 0 until maxRadix) {
+      // Inflow arbiters
+      val inputs = (i until conf.n by maxRadix).map(j => io.in(j))
+      val arb = Module(new LockingRRArbiter(io.in(0).bits, inputs.size, conf.count, conf.needsLock))
+      arb.io.in <> inputs
+      mid_in(i) <> Queue(arb.io.out, 1, pipe=true)
+
+      // Outflow routing
+      val out = Queue(mid_out(i), 1, pipe=true)
+      out.ready := Bool(false)
+      for (j <- i until conf.n by maxRadix) {
+        val selected = out.bits.header.dst === UInt(j)
+        io.out(j).valid := selected && out.valid
+        io.out(j).bits := out.bits
+        when (selected && io.out(j).ready) { out.ready := Bool(true) }
+      }
+    }
+
+    // Inner crossbar
+    mid_in.foreach { _.ready := Bool(false) }
+    mid_out.zipWithIndex.foreach { case (mout, i) =>
+      val arb = Module(new LockingRRArbiter(mid_in(0).bits, maxRadix, conf.count, conf.needsLock))
+      (arb.io.in, mid_in).zipped.foreach { case (arb_in, min) =>
+        val dest = min.bits.header.dst(log2Up(maxRadix)-1, 0)
+        val selected = dest === UInt(i)
+        arb_in.valid := selected && min.valid
+        arb_in.bits := min.bits
+        when (selected && arb_in.ready) { min.ready := Bool(true) }
+      }
+      mout <> arb.io.out
+    }
+  }
+}
+
 abstract class LogicalNetwork extends Module
 
 class LogicalHeader(implicit p: Parameters) extends util.ParameterizedBundle()(p) {
