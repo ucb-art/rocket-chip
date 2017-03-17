@@ -114,6 +114,7 @@ class ICache(latency: Int)(implicit p: Parameters) extends CoreModule()(p) with 
 
   for (i <- 0 until nWays) {
     val data_array = SeqMem(nSets * refillCycles, Bits(width = code.width(rowBits)))
+    data_array.suggestName(this.name + s"_${i}_sram")
     val wen = narrow_grant.valid && repl_way === UInt(i)
     when (wen) {
       val e_d = code.encode(narrow_grant.bits.data)

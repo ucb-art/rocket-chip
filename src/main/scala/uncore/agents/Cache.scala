@@ -171,6 +171,7 @@ class MetadataArray[T <: Metadata](onReset: () => T)(implicit p: Parameters) ext
     }
   } else {
     val tag_arr = SeqMem(nSets, Vec(nWays, UInt(width = metabits)))
+    tag_arr.suggestName(this.name + "_sram")
     when (rst || io.write.valid) {
       tag_arr.write(waddr, Vec.fill(nWays)(wdata), wmask)
     }
