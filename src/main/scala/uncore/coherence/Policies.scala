@@ -127,10 +127,10 @@ class MICoherence(dir: DirectoryRepresentation) extends CoherencePolicy(dir) {
   val nReleaseTypes = 4
   val nGrantTypes = 1
 
-  val acquireExclusive :: Nil = Enum(UInt(), nAcquireTypes)
+  val acquireExclusive :: acquireDummy :: Nil = Enum(UInt(), nAcquireTypes + 1)
   val probeInvalidate :: probeCopy :: Nil = Enum(UInt(), nProbeTypes)
   val releaseInvalidateData :: releaseCopyData :: releaseInvalidateAck :: releaseCopyAck :: Nil = Enum(UInt(), nReleaseTypes)
-  val grantExclusive :: Nil = Enum(UInt(), nGrantTypes)
+  val grantExclusive :: grantDummy :: Nil = Enum(UInt(), nGrantTypes + 1)
 
   def releaseTypesWithData = Seq(releaseInvalidateData, releaseCopyData)
   def grantTypesWithData = Seq(grantExclusive)
@@ -221,7 +221,7 @@ class MEICoherence(dir: DirectoryRepresentation) extends CoherencePolicy(dir) {
   val acquireExclusiveClean :: acquireExclusiveDirty :: Nil = Enum(UInt(), nAcquireTypes)
   val probeInvalidate :: probeDowngrade :: probeCopy :: Nil = Enum(UInt(), nProbeTypes)
   val releaseInvalidateData :: releaseDowngradeData :: releaseCopyData :: releaseInvalidateAck :: releaseDowngradeAck :: releaseCopyAck :: Nil = Enum(UInt(), nReleaseTypes)
-  val grantExclusive :: Nil = Enum(UInt(), nGrantTypes)
+  val grantExclusive :: grantDummy :: Nil = Enum(UInt(), nGrantTypes + 1)
 
   def releaseTypesWithData = Seq(releaseInvalidateData, releaseDowngradeData, releaseCopyData)
   def grantTypesWithData = Seq(grantExclusive)
