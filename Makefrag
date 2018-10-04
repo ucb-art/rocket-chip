@@ -20,18 +20,7 @@ SBT ?= java -Xmx$(JVM_MEMORY) -Xss8M -XX:MaxPermSize=256M -jar $(base_dir)/sbt-l
 SHELL := /bin/bash
 
 ROCKET_CLASSES ?= "$(base_dir)/target/scala-2.12/classes:$(base_dir)/chisel3/target/scala-2.12/*"
-FIRRTL_JAR ?= $(base_dir)/firrtl/utils/bin/firrtl.jar
-FIRRTL ?= java -Xmx$(JVM_MEMORY) -Xss8M -XX:MaxPermSize=256M -cp "$(FIRRTL_JAR)":"$(ROCKET_CLASSES)" firrtl.Driver
-
-# Build firrtl.jar and put it where chisel3 can find it.
-$(FIRRTL_JAR): $(shell find $(base_dir)/firrtl/src/main/scala -iname "*.scala")
-	$(MAKE) -C $(base_dir)/firrtl SBT="$(SBT)" root_dir=$(base_dir)/firrtl build-scala
-	touch $(FIRRTL_JAR)
-	mkdir -p $(base_dir)/lib
-	cp -p $(FIRRTL_JAR) $(base_dir)/lib
-# When chisel3 pr 448 is merged, the following extraneous copy may be removed.
-	mkdir -p $(base_dir)/chisel3/lib
-	cp -p $(FIRRTL_JAR) $(base_dir)/chisel3/lib
+FIRRTL ?= $(SBT) "runMain firrtl.Driver
 
 src_path := src/main/scala
 resources := $(base_dir)/src/main/resources

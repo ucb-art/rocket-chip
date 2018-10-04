@@ -15,19 +15,19 @@ lazy val commonSettings = Seq(
   parallelExecution in Global := false,
   traceLevel   := 15,
   scalacOptions ++= Seq("-deprecation","-unchecked","-Xsource:2.11"),
+  libraryDependencies += "edu.berkeley.cs" %% "chisel3" % "3.2-SNAPSHOT",
   libraryDependencies ++= Seq("org.scala-lang" % "scala-reflect" % scalaVersion.value),
   libraryDependencies ++= Seq("org.json4s" %% "json4s-jackson" % "3.5.3"),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
-lazy val chisel = (project in file("chisel3")).settings(commonSettings)
-lazy val hardfloat  = project.dependsOn(chisel).settings(commonSettings)
+lazy val hardfloat  = project.settings(commonSettings)
   .settings(crossScalaVersions := Seq("2.11.12", "2.12.4"))
 lazy val macros = (project in file("macros")).settings(commonSettings)
 lazy val rocketchip = (project in file("."))
   .settings(commonSettings, chipSettings)
-  .dependsOn(chisel, hardfloat, macros)
-  .aggregate(chisel, hardfloat, macros) // <-- means the running task on rocketchip is also run by aggregate tasks
+  .dependsOn(hardfloat, macros)
+  .aggregate(hardfloat, macros) // <-- means the running task on rocketchip is also run by aggregate tasks
 
 lazy val addons = settingKey[Seq[String]]("list of addons used for this build")
 lazy val make = inputKey[Unit]("trigger backend-specific makefile command")
